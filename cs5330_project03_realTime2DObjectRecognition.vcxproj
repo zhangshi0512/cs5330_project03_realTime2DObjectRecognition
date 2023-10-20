@@ -20,11 +20,13 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="display.h" />
+    <ClInclude Include="morphologicalOperations.h" />
     <ClInclude Include="thresholding.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="display.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="morphologicalOperations.cpp" />
     <ClCompile Include="thresholding.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

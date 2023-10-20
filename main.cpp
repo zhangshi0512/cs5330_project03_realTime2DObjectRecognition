@@ -5,6 +5,7 @@
 #include <vector>
 #include "thresholding.h"
 #include "display.h"
+#include "morphologicalOperations.h"
 #include <opencv2/opencv.hpp>
 
 // function to select image
@@ -61,23 +62,141 @@ BOOL saveFileDialog(std::wstring& outFilePath) {
     return FALSE;
 }
 
-void displayAndOptionallySave(const cv::Mat& original, const cv::Mat& thresholded) {
-    displayImages(original, thresholded);
+void displayAndOptionallySave(const cv::Mat& original, const cv::Mat& thresholded, const cv::Mat& cleaned, const cv::Mat& segmented) {
+    displayImages(original, thresholded, cleaned, segmented);
 
+    // Prompt for the thresholded image
     int userChoice = MessageBox(NULL, L"Would you like to save the thresholded image?", L"Save Image", MB_YESNO);
-
     if (userChoice == IDYES) {
         std::wstring savePath;
         if (saveFileDialog(savePath)) {
             if (!cv::imwrite(std::string(savePath.begin(), savePath.end()), thresholded)) {
-                MessageBox(NULL, L"Error: Could not save the image to the specified path.", L"Error", MB_OK);
+                MessageBox(NULL, L"Error: Could not save the thresholded image to the specified path.", L"Error", MB_OK);
             }
             else {
-                MessageBox(NULL, L"Image saved successfully!", L"Success", MB_OK);
+                MessageBox(NULL, L"Thresholded image saved successfully!", L"Success", MB_OK);
+            }
+        }
+    }
+
+    // Prompt for the morphological image
+    userChoice = MessageBox(NULL, L"Would you like to save the morphological image?", L"Save Image", MB_YESNO);
+    if (userChoice == IDYES) {
+        std::wstring savePath;
+        if (saveFileDialog(savePath)) {
+            if (!cv::imwrite(std::string(savePath.begin(), savePath.end()), cleaned)) {
+                MessageBox(NULL, L"Error: Could not save the morphological image to the specified path.", L"Error", MB_OK);
+            }
+            else {
+                MessageBox(NULL, L"Morphological image saved successfully!", L"Success", MB_OK);
+            }
+        }
+    }
+
+    // Prompt for the segmented image
+    userChoice = MessageBox(NULL, L"Would you like to save the segmented image?", L"Save Image", MB_YESNO);
+    if (userChoice == IDYES) {
+        std::wstring savePath;
+        if (saveFileDialog(savePath)) {
+            if (!cv::imwrite(std::string(savePath.begin(), savePath.end()), segmented)) {
+                MessageBox(NULL, L"Error: Could not save the segmented image to the specified path.", L"Error", MB_OK);
+            }
+            else {
+                MessageBox(NULL, L"Segmented image saved successfully!", L"Success", MB_OK);
             }
         }
     }
 }
+
+bool isBinaryImage(const cv::Mat& src) {
+    for (int i = 0; i < src.rows; i++) {
+        for (int j = 0; j < src.cols; j++) {
+            uchar pixel = src.at<uchar>(i, j);
+            if (pixel != 0 && pixel != 255) {
+                return false;
+            }
+        }
+    }
+    return true;
+}
+
+cv::Mat labelConnectedComponents(const cv::Mat& src, int minSize, cv::Mat& stats) {
+    cv::Mat labels, centroids, invertedSrc;
+
+    // Check if src is empty
+    if (src.empty()) {
+        std::cerr << "Error: The source image is empty!" << std::endl;
+        return labels;
+    }
+
+    if (src.channels() != 1) {
+        std::cerr << "Error: The source image is not single-channel." << std::endl;
+        return labels;
+    }
+
+    if (!isBinaryImage(src)) {
+        std::cerr << "Error: The source image is not binary." << std::endl;
+        return labels;
+    }
+
+    // Invert the binary image
+    cv::bitwise_not(src, invertedSrc);
+
+    // Connected components analysis
+    int nLabels = cv::connectedComponentsWithStats(invertedSrc, labels, stats, centroids);
+
+    // Check boundaries
+    if (nLabels > stats.rows || nLabels > centroids.rows) {
+        std::cerr << "Error: Mismatch between nLabels and stats/centroids rows." << std::endl;
+        return labels;
+    }
+
+    for (int i = 1; i < nLabels; i++) {
+        if (stats.at<int>(i, cv::CC_STAT_AREA) < minSize) {
+            for (int j = 0; j < src.rows; j++) {
+                for (int k = 0; k < src.cols; k++) {
+                    if (labels.at<int>(j, k) == i) {
+                        labels.at<int>(j, k) = 0;  // set the label to 0 (background) for regions below minSize
+                    }
+                }
+            }
+        }
+    }
+    return labels;
+}
+
+cv::Mat colorConnectedComponents(const cv::Mat& labels) {
+    // A vector to hold the colors for each label
+    std::vector<cv::Vec3b> colors;
+
+    // Find the maximum label value in the labels image.
+    double minVal, maxVal;
+    cv::minMaxLoc(labels, &minVal, &maxVal);
+
+    // Generate a random color for each label
+    for (int i = 0; i <= maxVal; i++) {
+        colors.push_back(cv::Vec3b(rand() & 255, rand() & 255, rand() & 255));
+    }
+
+    // Set the color for the background (using top-left pixel as reference for background) to black
+    int backgroundLabel = labels.at<int>(0, 0);
+    colors[backgroundLabel] = cv::Vec3b(0, 0, 0);
+
+    // Create a new image to store the colored version of the labels image
+    cv::Mat colored = cv::Mat(labels.size(), CV_8UC3);
+
+    // Populate the colored image using the colors vector
+    for (int i = 0; i < labels.rows; i++) {
+        for (int j = 0; j < labels.cols; j++) {
+            int label = labels.at<int>(i, j);
+            colored.at<cv::Vec3b>(i, j) = colors[label];
+        }
+    }
+
+    return colored;
+}
+
+
 
 int main() {
     // Open the default camera
@@ -91,7 +210,7 @@ int main() {
 
     // adjust the exposure and brightness of the external camera
     cap.set(cv::CAP_PROP_AUTO_EXPOSURE, 0);
-    cap.set(cv::CAP_PROP_EXPOSURE, 0);      
+    cap.set(cv::CAP_PROP_EXPOSURE, 3);      
     cap.set(cv::CAP_PROP_BRIGHTNESS, 70);
 
     while (true) {
@@ -106,29 +225,33 @@ int main() {
         cv::Mat thresholded;
         dynamicThresholding(frame, thresholded);
 
-        displayImages(frame, thresholded);  // Displaying the original and thresholded frames
+        // Debug output
+        std::cout << "Number of channels in 'thresholded' image: " << thresholded.channels() << std::endl;
 
-        // Check if 's' key is pressed to save the frame
+        cv::Mat cleaned;
+        applyMorphologicalOperations(thresholded, cleaned);
+
+        // Ensure the cleaned image is strictly binary
+        cv::threshold(cleaned, cleaned, 127, 255, cv::THRESH_BINARY);
+
+        // Debug output
+        std::cout << "Number of channels in 'cleaned' image: " << cleaned.channels() << std::endl;
+
+        cv::Mat stats;
+        cv::Mat labels = labelConnectedComponents(cleaned, 500, stats); // 500 is a sample minimum size threshold
+        cv::Mat coloredLabels = colorConnectedComponents(labels);
+
+        // Displaying the original, thresholded, morphological and segmented frames
+        displayImages(frame, thresholded, cleaned, coloredLabels);
+
         int key = cv::waitKey(100);
         if (key == 's' || key == 'S') {
-            std::wstring savePath;
-            if (saveFileDialog(savePath)) {
-                std::cout << "Attempting to save image to: " << std::string(savePath.begin(), savePath.end()) << std::endl;
-                if (!cv::imwrite(std::string(savePath.begin(), savePath.end()), frame)) {
-                    std::cerr << "Error: Could not save the image to the specified path." << std::endl;
-                    MessageBox(NULL, L"Error: Could not save the image to the specified path.", L"Error", MB_OK);
-                }
-                else {
-                    std::cout << "Image saved successfully!" << std::endl;
-                    MessageBox(NULL, L"Image saved successfully!", L"Success", MB_OK);
-                }
-            }
-            else {
-                std::cerr << "Error: Save dialog cancelled or encountered an error." << std::endl;
-            }
+            displayAndOptionallySave(frame, thresholded, cleaned, coloredLabels);
         }
-        // Check if display window is closed
-        else if (cv::getWindowProperty("Original", cv::WND_PROP_VISIBLE) < 1) {
+        else if (cv::getWindowProperty("Original", cv::WND_PROP_VISIBLE) < 1 ||
+            cv::getWindowProperty("Thresholded", cv::WND_PROP_VISIBLE) < 1 ||
+            cv::getWindowProperty("Cleaned", cv::WND_PROP_VISIBLE) < 1) {
+
             int msgboxID = MessageBox(
                 NULL,
                 L"Do you want to save the frames?",
@@ -136,23 +259,13 @@ int main() {
                 MB_ICONQUESTION | MB_YESNO | MB_DEFBUTTON2
             );
 
-            switch (msgboxID) {
-            case IDYES:
-            {
-                std::wstring savePathOriginal, savePathThresholded;
-                if (saveFileDialog(savePathOriginal)) {
-                    cv::imwrite(std::string(savePathOriginal.begin(), savePathOriginal.end()), frame);
-                }
-                if (saveFileDialog(savePathThresholded)) {
-                    cv::imwrite(std::string(savePathThresholded.begin(), savePathThresholded.end()), thresholded);
-                }
+            if (msgboxID == IDYES) {
+                displayAndOptionallySave(frame, thresholded, cleaned, coloredLabels);
             }
-            break;
-            case IDNO:
-                break;
-            }
+
             break;
         }
+
     }
 
     cap.release();

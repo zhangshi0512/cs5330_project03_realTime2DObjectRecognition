@@ -29,19 +29,20 @@ void dynamicThresholding(const cv::Mat& src, cv::Mat& dst) {
     int thresholdValue = static_cast<int>((center1 + center2) / 2.0f);
 
     // Threshold the image
-    thresholdImage(src, dst, thresholdValue);
+    thresholdImage(blurred, dst, thresholdValue);
 }
 
 void thresholdImage(const cv::Mat& src, cv::Mat& dst, int thresholdValue) {
-    dst = src.clone();
-    for (int i = 0; i < src.rows; i++) {
-        for (int j = 0; j < src.cols; j++) {
-            cv::Vec3b& pixel = dst.at<cv::Vec3b>(i, j);
-            if (pixel[0] + pixel[1] + pixel[2] < 3 * thresholdValue) {
-                pixel[0] = pixel[1] = pixel[2] = 0; // Set to black
-            }
-            else {
-                pixel[0] = pixel[1] = pixel[2] = 255; // Set to white
+    cv::Mat grayscale;
+    cv::cvtColor(src, grayscale, cv::COLOR_BGR2GRAY); // Convert to grayscale
+
+    dst = cv::Mat::zeros(src.rows, src.cols, CV_8U); // Initialize with zeros (all black)
+
+    for (int i = 0; i < grayscale.rows; i++) {
+        for (int j = 0; j < grayscale.cols; j++) {
+            uchar pixelValue = grayscale.at<uchar>(i, j);
+            if (pixelValue > thresholdValue) {
+                dst.at<uchar>(i, j) = 255; // Set to white
             }
         }
     }
