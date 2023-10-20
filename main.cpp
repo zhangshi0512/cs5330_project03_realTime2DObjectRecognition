@@ -196,6 +196,62 @@ cv::Mat colorConnectedComponents(const cv::Mat& labels) {
     return colored;
 }
 
+// function to compute features
+// Structure to hold region features
+struct RegionFeatures {
+    cv::RotatedRect orientedBoundingBox;
+    cv::Vec2f axisOfLeastMoment;
+    float percentFilled;
+    float bboxAspectRatio;
+};
+
+RegionFeatures computeRegionFeatures(const cv::Mat& labels, int regionID) {
+    RegionFeatures features;
+    std::vector<cv::Point2f> regionPoints;
+
+    // Extract points belonging to the region
+    for (int i = 0; i < labels.rows; i++) {
+        for (int j = 0; j < labels.cols; j++) {
+            if (labels.at<int>(i, j) == regionID) {
+                regionPoints.push_back(cv::Point2f(j, i));  // Note: (j, i) because j is x (column) and i is y (row)
+            }
+        }
+    }
+
+    // Skip if there are not enough points
+    if (regionPoints.size() < 2) {
+        std::cerr << "Error: Not enough distinct points in region " << regionID << " to compute features." << std::endl;
+        return features;
+    }
+
+    try {
+        // Compute the oriented bounding box
+        features.orientedBoundingBox = cv::minAreaRect(regionPoints);
+
+        // Compute the aspect ratio of the oriented bounding box
+        features.bboxAspectRatio = std::max(features.orientedBoundingBox.size.width, features.orientedBoundingBox.size.height) /
+            std::min(features.orientedBoundingBox.size.width, features.orientedBoundingBox.size.height);
+
+        // Compute percent filled within the oriented bounding box
+        cv::Mat mask = cv::Mat::zeros(labels.size(), CV_8U);
+        for (const auto& point : regionPoints) {
+            mask.at<uchar>(point.y, point.x) = 255;
+        }
+        cv::RotatedRect rect = features.orientedBoundingBox;
+        cv::Rect boundingBox = rect.boundingRect();
+        cv::Mat croppedMask = mask(boundingBox);
+        double areaFilled = cv::countNonZero(croppedMask);
+        double totalArea = boundingBox.width * boundingBox.height;
+        features.percentFilled = areaFilled / totalArea;
+
+    }
+    catch (const cv::Exception& e) {
+        std::cerr << "Error computing features for region " << regionID << ": " << e.what() << std::endl;
+    }
+
+    return features;
+}
+
 
 
 int main() {
@@ -241,16 +297,35 @@ int main() {
         cv::Mat labels = labelConnectedComponents(cleaned, 500, stats); // 500 is a sample minimum size threshold
         cv::Mat coloredLabels = colorConnectedComponents(labels);
 
-        // Displaying the original, thresholded, morphological and segmented frames
-        displayImages(frame, thresholded, cleaned, coloredLabels);
+        // Compute features for each major region and visualize
+        cv::Mat visualization = coloredLabels.clone();
+        for (int i = 1; i < stats.rows; i++) {  // Starting from 1 to skip the background
+            RegionFeatures features = computeRegionFeatures(labels, i);
+
+            // Draw oriented bounding box
+            cv::Point2f vertices[4];
+            features.orientedBoundingBox.points(vertices);
+            for (int j = 0; j < 4; j++) {
+                cv::line(visualization, vertices[j], vertices[(j + 1) % 4], cv::Scalar(0, 255, 0), 2);
+            }
+
+            // Draw axis of least moment
+            cv::Point2f center = features.orientedBoundingBox.center;
+            cv::Point2f endpoint = center + 100 * cv::Point2f(features.axisOfLeastMoment[0], features.axisOfLeastMoment[1]);
+            cv::line(visualization, center, endpoint, cv::Scalar(0, 0, 255), 2);
+        }
+
+        // Displaying the original, thresholded, morphological, and segmented frames with features
+        displayImages(frame, thresholded, cleaned, visualization);
 
         int key = cv::waitKey(100);
         if (key == 's' || key == 'S') {
-            displayAndOptionallySave(frame, thresholded, cleaned, coloredLabels);
+            displayAndOptionallySave(frame, thresholded, cleaned, visualization);
         }
         else if (cv::getWindowProperty("Original", cv::WND_PROP_VISIBLE) < 1 ||
             cv::getWindowProperty("Thresholded", cv::WND_PROP_VISIBLE) < 1 ||
-            cv::getWindowProperty("Cleaned", cv::WND_PROP_VISIBLE) < 1) {
+            cv::getWindowProperty("Cleaned", cv::WND_PROP_VISIBLE) < 1 ||
+            cv::getWindowProperty("Segmented Image", cv::WND_PROP_VISIBLE) < 1) {
 
             int msgboxID = MessageBox(
                 NULL,
@@ -260,11 +335,12 @@ int main() {
             );
 
             if (msgboxID == IDYES) {
-                displayAndOptionallySave(frame, thresholded, cleaned, coloredLabels);
+                displayAndOptionallySave(frame, thresholded, cleaned, visualization);
             }
 
             break;
         }
+
 
     }
 
