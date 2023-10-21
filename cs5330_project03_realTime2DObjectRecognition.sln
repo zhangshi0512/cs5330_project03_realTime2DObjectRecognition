@@ -3,7 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.5.33627.172
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "cs5330_project03_realTime2DObjectRecognition", "cs5330_project03_realTime2DObjectRecognition.vcxproj", "{C34FAC7A-DCA3-47A8-BE37-EB7DF0E5C16F}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "realTime2dObjectRecognition", "cs5330_project03_realTime2DObjectRecognition.vcxproj", "{C34FAC7A-DCA3-47A8-BE37-EB7DF0E5C16F}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ImageFeatureExtractor", "..\ImageFeatureExtractor\ImageFeatureExtractor.vcxproj", "{5F76DC6F-73D4-4D5F-8B16-900AE6E39AB6}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +23,14 @@ Global
 		{C34FAC7A-DCA3-47A8-BE37-EB7DF0E5C16F}.Release|x64.Build.0 = Release|x64
 		{C34FAC7A-DCA3-47A8-BE37-EB7DF0E5C16F}.Release|x86.ActiveCfg = Release|Win32
 		{C34FAC7A-DCA3-47A8-BE37-EB7DF0E5C16F}.Release|x86.Build.0 = Release|Win32
+		{5F76DC6F-73D4-4D5F-8B16-900AE6E39AB6}.Debug|x64.ActiveCfg = Debug|x64
+		{5F76DC6F-73D4-4D5F-8B16-900AE6E39AB6}.Debug|x64.Build.0 = Debug|x64
+		{5F76DC6F-73D4-4D5F-8B16-900AE6E39AB6}.Debug|x86.ActiveCfg = Debug|Win32
+		{5F76DC6F-73D4-4D5F-8B16-900AE6E39AB6}.Debug|x86.Build.0 = Debug|Win32
+		{5F76DC6F-73D4-4D5F-8B16-900AE6E39AB6}.Release|x64.ActiveCfg = Release|x64
+		{5F76DC6F-73D4-4D5F-8B16-900AE6E39AB6}.Release|x64.Build.0 = Release|x64
+		{5F76DC6F-73D4-4D5F-8B16-900AE6E39AB6}.Release|x86.ActiveCfg = Release|Win32
+		{5F76DC6F-73D4-4D5F-8B16-900AE6E39AB6}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
