@@ -24,6 +24,9 @@
     <ClInclude Include="morphologicalOperations.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="feature_extraction.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="thresholding.cpp">
@@ -36,6 +39,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="morphologicalOperations.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="feature_extraction.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

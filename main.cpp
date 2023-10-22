@@ -8,6 +8,7 @@
 #include "thresholding.h"
 #include "display.h"
 #include "morphologicalOperations.h"
+#include "feature_extraction.h"
 #include <opencv2/opencv.hpp>
 
 // function to select image
@@ -67,8 +68,22 @@ BOOL saveFileDialog(std::wstring& outFilePath) {
 void displayAndOptionallySave(const cv::Mat& original, const cv::Mat& thresholded, const cv::Mat& cleaned, const cv::Mat& segmented) {
     displayImages(original, thresholded, cleaned, segmented);
 
+    // Prompt for the original image
+    int userChoice = MessageBox(NULL, L"Would you like to save the original image?", L"Save Image", MB_YESNO);
+    if (userChoice == IDYES) {
+        std::wstring savePath;
+        if (saveFileDialog(savePath)) {
+            if (!cv::imwrite(std::string(savePath.begin(), savePath.end()), original)) {
+                MessageBox(NULL, L"Error: Could not save the original image to the specified path.", L"Error", MB_OK);
+            }
+            else {
+                MessageBox(NULL, L"Original image saved successfully!", L"Success", MB_OK);
+            }
+        }
+    }
+
     // Prompt for the thresholded image
-    int userChoice = MessageBox(NULL, L"Would you like to save the thresholded image?", L"Save Image", MB_YESNO);
+    userChoice = MessageBox(NULL, L"Would you like to save the thresholded image?", L"Save Image", MB_YESNO);
     if (userChoice == IDYES) {
         std::wstring savePath;
         if (saveFileDialog(savePath)) {
@@ -109,6 +124,7 @@ void displayAndOptionallySave(const cv::Mat& original, const cv::Mat& thresholde
         }
     }
 }
+
 
 bool isBinaryImage(const cv::Mat& src) {
     for (int i = 0; i < src.rows; i++) {
@@ -198,86 +214,18 @@ cv::Mat colorConnectedComponents(const cv::Mat& labels) {
     return colored;
 }
 
-// function to compute features
-// Structure to hold region features
-struct RegionFeatures {
-    cv::RotatedRect orientedBoundingBox;
-    cv::Vec2f axisOfLeastMoment;
-    float percentFilled;
-    float bboxAspectRatio;
-};
-
-RegionFeatures computeRegionFeatures(const cv::Mat& labels, int regionID) {
-    RegionFeatures features;
-    std::vector<cv::Point2f> regionPoints;
-
-    // Extract points belonging to the region
-    for (int i = 0; i < labels.rows; i++) {
-        for (int j = 0; j < labels.cols; j++) {
-            if (labels.at<int>(i, j) == regionID) {
-                regionPoints.push_back(cv::Point2f(j, i));  // Note: (j, i) because j is x (column) and i is y (row)
-            }
-        }
-    }
-
-    // Skip if there are not enough points
-    if (regionPoints.size() < 2) {
-        std::cerr << "Error: Not enough distinct points in region " << regionID << " to compute features." << std::endl;
-        return features;
-    }
-
-    try {
-        // Compute the oriented bounding box
-        features.orientedBoundingBox = cv::minAreaRect(regionPoints);
-
-        // Compute the aspect ratio of the oriented bounding box
-        features.bboxAspectRatio = std::max(features.orientedBoundingBox.size.width, features.orientedBoundingBox.size.height) /
-            std::min(features.orientedBoundingBox.size.width, features.orientedBoundingBox.size.height);
-
-        // Compute percent filled within the oriented bounding box
-        cv::Mat mask = cv::Mat::zeros(labels.size(), CV_8U);
-        for (const auto& point : regionPoints) {
-            mask.at<uchar>(point.y, point.x) = 255;
-        }
-        cv::RotatedRect rect = features.orientedBoundingBox;
-        cv::Rect boundingBox = rect.boundingRect();
-        // Clip the bounding box to ensure it's within image boundaries
-        boundingBox &= cv::Rect(0, 0, mask.cols, mask.rows);
-        cv::Mat croppedMask = mask(boundingBox);
-        double areaFilled = cv::countNonZero(croppedMask);
-        double totalArea = boundingBox.width * boundingBox.height;
-        features.percentFilled = areaFilled / totalArea;
-
-        // Compute the image moments for the region
-        cv::Moments m = cv::moments(regionPoints);
-
-        // Calculate the orientation (or angle) of the region
-        double delta_x = 2 * m.mu11;
-        double delta_y = m.mu20 - m.mu02;
-        double orientation = 0.5 * std::atan2(delta_x, delta_y);
-
-        // The axis of least moment is perpendicular to the orientation
-        features.axisOfLeastMoment[0] = std::cos(orientation + CV_PI / 2);
-        features.axisOfLeastMoment[1] = std::sin(orientation + CV_PI / 2);
-
-    }
-    catch (const cv::Exception& e) {
-        std::cerr << "Error computing features for region " << regionID << ": " << e.what() << std::endl;
-    }
-
-    return features;
-}
 
 // Function to hold training database
+// Data structure to hold feature vectors and labels
 // Data structure to hold feature vectors and labels
 struct ObjectData {
     std::string label;
     RegionFeatures features;
+    float additionalFeatures[16]; 
 };
 
-std::vector<ObjectData> objectDB;
 
-void saveObjectDB(const std::string& filename) {
+void saveObjectDB(const std::string& filename, const std::vector<ObjectData>& objectDB) {
     std::ofstream outFile(filename, std::ios::out);
     if (!outFile) {
         std::cerr << "Error: Couldn't open file for writing: " << filename << std::endl;
@@ -300,6 +248,12 @@ void saveObjectDB(const std::string& filename) {
             << data.features.axisOfLeastMoment[1] << " "
             << data.features.percentFilled << " "
             << data.features.bboxAspectRatio << std::endl;
+        // Serialize the Hu Moments
+        for (int i = 0; i < 7; i++) {
+            outFile << data.features.huMoments[i] << " ";
+        }
+        outFile << std::endl;
+
     }
 
     outFile.close();
@@ -317,6 +271,7 @@ std::string getLabelFromUser() {
 **/
 
 // function to load object database from a csv file
+// function to load object database from a csv file
 bool loadObjectDBFromCSV(const std::string& filename, std::vector<ObjectData>& objectDB) {
     std::ifstream inFile(filename, std::ios::in);
     if (!inFile) {
@@ -332,11 +287,22 @@ bool loadObjectDBFromCSV(const std::string& filename, std::vector<ObjectData>& o
         std::getline(ss, data.label, ',');  // Get the label
 
         // Deserialize the features:
-        ss >> data.features.orientedBoundingBox.center.x >> data.features.orientedBoundingBox.center.y
-            >> data.features.orientedBoundingBox.size.width >> data.features.orientedBoundingBox.size.height
-            >> data.features.orientedBoundingBox.angle >> data.features.axisOfLeastMoment[0]
-            >> data.features.axisOfLeastMoment[1] >> data.features.percentFilled
+        ss >> data.features.orientedBoundingBox.center.x
+            >> data.features.orientedBoundingBox.center.y
+            >> data.features.orientedBoundingBox.size.width
+            >> data.features.orientedBoundingBox.size.height
+            >> data.features.orientedBoundingBox.angle
+            >> data.features.axisOfLeastMoment[0]
+            >> data.features.axisOfLeastMoment[1]
+            >> data.features.orthogonalVector[0]
+            >> data.features.orthogonalVector[1]
+            >> data.features.percentFilled
             >> data.features.bboxAspectRatio;
+
+        // Deserialize the additional features
+        for (int i = 0; i < 16; i++) {
+            ss >> data.additionalFeatures[i];
+        }
 
         objectDB.push_back(data);
     }
@@ -345,6 +311,7 @@ bool loadObjectDBFromCSV(const std::string& filename, std::vector<ObjectData>& o
     std::cout << "Loaded object data from: " << filename << std::endl;
     return true;
 }
+
 
 // Function to define the scaled Euclidean distance metric
 float scaledEuclideanDistance(const RegionFeatures& f1, const RegionFeatures& f2) {
@@ -370,10 +337,16 @@ float scaledEuclideanDistance(const RegionFeatures& f1, const RegionFeatures& f2
     float distance_filled = std::pow((f1.percentFilled - f2.percentFilled) / stdev_percentFilled, 2);
     float distance_aspect = std::pow((f1.bboxAspectRatio - f2.bboxAspectRatio) / stdev_bboxAspectRatio, 2);
 
+    float hausdorffDist = hausdorffDistance(f1.contour, f2.contour);
+    float weight_hausdorff = 1.0;
+
+    distance += weight_hausdorff * hausdorffDist;
+
     distance = distance_center_x + distance_center_y + distance_width + distance_height +
         distance_angle + distance_axis_0 + distance_axis_1 + distance_filled + distance_aspect;
 
     // Debug prints
+    std::cout << "Calculating distance..." << std::endl;
     std::cout << "center_x distance: " << distance_center_x << std::endl;
     std::cout << "center_y distance: " << distance_center_y << std::endl;
     std::cout << "width distance: " << distance_width << std::endl;
@@ -389,19 +362,54 @@ float scaledEuclideanDistance(const RegionFeatures& f1, const RegionFeatures& f2
 
 
 // Function to compare new object's feature vector to existing database using the distance metric
-const float RECOGNITION_THRESHOLD = 10.0; // This is a placeholder value. You might need to adjust it based on your data.
-
-std::string classifyObject(const RegionFeatures& features) {
+std::string classifyObject(const RegionFeatures& features, const std::vector<ObjectData>& objectDB) {
     std::cout << "Classifying object..." << std::endl;
+    std::cout << "Number of objects in objectDB: " << objectDB.size() << std::endl;
     float minDistance = std::numeric_limits<float>::max();
     std::string bestMatchLabel = "Unknown";
 
+    std::cout << "Number of objects in objectDB: " << objectDB.size() << std::endl;
+
+
     for (const ObjectData& data : objectDB) {
+        std::cout << "Comparing with object labeled: " << data.label << std::endl;
         float distance = scaledEuclideanDistance(features, data.features);
         std::cout << "Distance to " << data.label << ": " << distance << std::endl;
         if (distance < minDistance) {
             minDistance = distance;
             bestMatchLabel = data.label;
+        }
+    }
+
+    return bestMatchLabel;
+}
+
+// KNN classifier
+std::string classifyObjectKNN(const RegionFeatures& features, const std::vector<ObjectData>& objectDB, int k) {
+    std::vector<std::pair<float, std::string>> distances;
+
+    // Calculate distances to all instances in the database
+    for (const ObjectData& data : objectDB) {
+        float distance = scaledEuclideanDistance(features, data.features);
+        distances.push_back({ distance, data.label });
+    }
+
+    // Sort distances
+    std::sort(distances.begin(), distances.end());
+
+    // Use a map to count the occurrences of each label among the k nearest neighbors
+    std::map<std::string, int> labelCounts;
+    for (int i = 0; i < k && i < distances.size(); i++) {
+        labelCounts[distances[i].second]++;
+    }
+
+    // Find the label with the maximum count
+    std::string bestMatchLabel = "Unknown";
+    int maxCount = 0;
+    for (auto& pair : labelCounts) {
+        if (pair.second > maxCount) {
+            maxCount = pair.second;
+            bestMatchLabel = pair.first;
         }
     }
 
@@ -416,6 +424,9 @@ int main() {
     // load the existing database from a local csv:
     if (loadObjectDBFromCSV("C:/Users/Shi Zhang/My Drive/CS/NEU Align/Courses/2023 Fall/5330/Project03/img_database.csv", objectDB)) {
         std::cout << "Number of objects in database: " << objectDB.size() << std::endl;
+        for (const ObjectData& data : objectDB) {
+            std::cout << "Label: " << data.label << std::endl;
+        }
     }
     else {
         std::cerr << "Failed to load object database." << std::endl;
@@ -433,8 +444,8 @@ int main() {
 
     // Adjust the exposure and brightness of the external camera
     cap.set(cv::CAP_PROP_AUTO_EXPOSURE, 0);
-    cap.set(cv::CAP_PROP_EXPOSURE, 3);
-    cap.set(cv::CAP_PROP_BRIGHTNESS, 70);
+    cap.set(cv::CAP_PROP_EXPOSURE, 0);
+    cap.set(cv::CAP_PROP_BRIGHTNESS, 20);
 
     while (true) {
         cv::Mat frame;
@@ -461,6 +472,19 @@ int main() {
             std::cout << "Processing region: " << i << std::endl;
             RegionFeatures features = computeRegionFeatures(labels, i);
 
+            // compute and draw the contour
+            std::vector<cv::Point> contour = computeRegionContour(labels, i);
+            if (!contour.empty()) {
+                cv::drawContours(visualization, std::vector<std::vector<cv::Point>>{contour}, 0, cv::Scalar(255, 0, 0), 2);  // Drawing in blue
+            }
+
+            // Draw oriented bounding box
+            cv::Point2f vertices[4];
+            features.orientedBoundingBox.points(vertices);
+            for (int j = 0; j < 4; j++) {
+                cv::line(visualization, vertices[j], vertices[(j + 1) % 4], cv::Scalar(0, 0, 255), 2);  // Drawing in red
+            }
+
             // add label on top of the image
             int x = static_cast<int>(features.orientedBoundingBox.center.x);
             int y = static_cast<int>(features.orientedBoundingBox.center.y);
@@ -474,15 +498,9 @@ int main() {
                 x = textOffsetX; // Reset x to the offset if it's too close to the left edge
             }
 
-            std::string label = classifyObject(features);
+            // std::string label = classifyObject(features, objectDB);
+            std::string label = classifyObjectKNN(features, objectDB, 3); 
             cv::putText(visualization, label, cv::Point(x - textOffsetX, y - textOffsetY), cv::FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(255, 255, 255), 1);
-
-            // Draw oriented bounding box
-            cv::Point2f vertices[4];
-            features.orientedBoundingBox.points(vertices);
-            for (int j = 0; j < 4; j++) {
-                cv::line(visualization, vertices[j], vertices[(j + 1) % 4], cv::Scalar(0, 255, 0), 2);
-            }
 
             // Draw axis of least moment (as a line centered on the bounding box's center)
             cv::Point2f center = features.orientedBoundingBox.center;
@@ -490,44 +508,42 @@ int main() {
             cv::Point2f endpoint = center + 100 * cv::Point2f(features.axisOfLeastMoment[0], features.axisOfLeastMoment[1]); 
             cv::Point2f startpoint = center - 100 * cv::Point2f(features.axisOfLeastMoment[0], features.axisOfLeastMoment[1]); 
             cv::line(visualization, startpoint, endpoint, cv::Scalar(0, 0, 255), 2);
+            // Draw orthogonal vector (as a line centered on the bounding box's center)
+            cv::Point2f orthogonalEndpoint = center + 100 * cv::Point2f(features.orthogonalVector[0], features.orthogonalVector[1]);
+            cv::Point2f orthogonalStartpoint = center - 100 * cv::Point2f(features.orthogonalVector[0], features.orthogonalVector[1]);
+            cv::line(visualization, orthogonalStartpoint, orthogonalEndpoint, cv::Scalar(255, 0, 0), 2);  // Using blue color
+
         }
 
         // Displaying the images
         displayImages(frame, thresholded, cleaned, visualization);
 
-        // Inform the user about possible actions
-        std::cout << "Press 'n' to label the object, 's' to save the images, 'w' to save the database, or 'q' to quit." << std::endl;
+        // Prompt for saving the images or exiting
+        int userChoice = MessageBox(NULL, L"Do you want to save the images or exit?", L"Save or Exit", MB_YESNOCANCEL);
+
+        if (userChoice == IDYES) {
+            displayAndOptionallySave(frame, thresholded, cleaned, visualization);
+        }
+        else if (userChoice == IDNO) {
+            // Inform the user about other possible actions
+            std::cout << "Press 'n' to label the object, 's' to save the images, 'w' to save the database." << std::endl;
+        }
+        else {  // IDCANCEL or any other option
+            break;  // Exit the loop
+        }
 
         // Wait for a user keypress
         int key = cv::waitKey(0);  // 0 means wait indefinitely until a key is pressed
 
         // Handle the keypress
         if (key == 'n' || key == 'N') {
-            std::string label;
-            std::cout << "Enter the label for the current object: ";
-            std::cin >> label;
-            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');  // Clear the newline from the buffer
-
-            // storing features from the lasrgest region
-            int largestArea = 0;
-            int largestLabel = 0;
-            for (int i = 1; i < stats.rows; i++) {
-                int area = stats.at<int>(i, cv::CC_STAT_AREA);
-                if (area > largestArea) {
-                    largestArea = area;
-                    largestLabel = i;
-                }
-            }
-
-            RegionFeatures features = computeRegionFeatures(labels, largestLabel);
-            objectDB.push_back({ label, features });
-            std::cout << "Stored features for object labeled: " << label << std::endl;
+            // ... (rest of your labeling code)
         }
         else if (key == 's' || key == 'S') {
             displayAndOptionallySave(frame, thresholded, cleaned, visualization);
         }
         else if (key == 'w' || key == 'W') {
-            saveObjectDB("C:/Users/Shi Zhang/My Drive/CS/NEU Align/Courses/2023 Fall/5330/Project03/img_database_single.txt");
+            saveObjectDB("C:/Users/Shi Zhang/My Drive/CS/NEU Align/Courses/2023 Fall/5330/Project03/img_database_single.txt", objectDB);
         }
         else if (key == 'q' || key == 'Q' || key == 27) {  // 27 is the ESC key
             break;  // Exit the loop
@@ -538,29 +554,3 @@ int main() {
     cv::destroyAllWindows();
     return 0;
 }
-
-
-/***
-int main(int argc, char* argv[]) {
-    // Get list of selected image paths
-    std::vector<std::string> filePaths = openFileDialog();
-
-    for (const std::string& path : filePaths) {
-        // Read the image from the path
-        cv::Mat original = cv::imread(path);
-        if (original.empty()) {
-            std::cout << "Failed to load image from path: " << path << std::endl;
-            continue;
-        }
-
-        // Threshold the image
-        cv::Mat thresholded;
-        thresholdImage(original, thresholded, 100); // you can change the threshold value
-
-        // Display original and thresholded images
-        displayAndOptionallySave(original, thresholded);
-    }
-
-    return 0;
-}
-***/
