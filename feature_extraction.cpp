@@ -2,6 +2,8 @@
 // This file contains functions for extracting features from regions in an image, such as contours,
 // oriented bounding boxes, aspect ratios, and Hu moments, as well as computing the Hausdorff distance between contours.
 
+// CS 5330 Computer Vision
+// Fall 2023 Dec 9th
 // Author: Shi Zhang
 
 #include "feature_extraction.h"

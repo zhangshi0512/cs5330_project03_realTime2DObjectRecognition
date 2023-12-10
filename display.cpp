@@ -2,6 +2,8 @@
 // This file contains functions for displaying multiple images in a single window. 
 // It provides utilities to organize and visualize different stages of image processing.
 
+// CS 5330 Computer Vision
+// Fall 2023 Dec 9th
 // Author: Shi Zhang
 
 #include "display.h"

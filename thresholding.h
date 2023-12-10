@@ -2,6 +2,8 @@
 // Description: Provides functions for dynamic thresholding of images using OpenCV.
 // These functions include dynamic thresholding and simple thresholding based on a specified value.
 
+// CS 5330 Computer Vision
+// Fall 2023 Dec 9th
 // Author: Shi Zhang
 
 

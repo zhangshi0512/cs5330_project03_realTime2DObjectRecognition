@@ -2,6 +2,8 @@
 // This file contains custom implementations of morphological operations (erosion, dilation)
 // and their application to process images using OpenCV.
 
+// CS 5330 Computer Vision
+// Fall 2023 Dec 9th
 // Author: Shi Zhang
 
 #include <opencv2/opencv.hpp>

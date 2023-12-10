@@ -2,6 +2,8 @@
 // Implements dynamic thresholding techniques for image processing, including a custom method 
 // that uses k-means clustering for threshold determination.
 
+// CS 5330 Computer Vision
+// Fall 2023 Dec 9th
 // Author: Shi Zhang
 
 #include "thresholding.h"

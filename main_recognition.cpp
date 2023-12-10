@@ -3,6 +3,8 @@
 // It includes functions for opening and saving files, image thresholding, connected components labeling,
 // feature extraction, object classification, and displaying results.
 
+// CS 5330 Computer Vision
+// Fall 2023 Dec 9th
 // Author: Shi Zhang
 
 #include <iostream>
