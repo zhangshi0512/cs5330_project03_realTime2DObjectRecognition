@@ -8,6 +8,8 @@ Instructor: Bruce Maxwell
 
 Student: Shi Zhang
 
+Last modified: 12/09/2023
+
 ## Project Report
 
 #### 1. Introduction
@@ -19,84 +21,84 @@ This project focuses on creating an Object Recognition (OR) system that identifi
 #### 2. Visual Demonstrations
 
 - **Task 1: Thresholded Objects**
-  
+
   ![Thresholded Object 1](/Live%20Video%20Frames/Sunglass2.jpg)
 
-  *Original video frame image of Sunglass.*
+  _Original video frame image of Sunglass._
 
   ![Thresholded Object 2](/Live%20Video%20Frames/Sunglass2_threshold.jpg)
 
-  *Threshold Output of video frame image of Sunglass.*
+  _Threshold Output of video frame image of Sunglass._
 
   ![Thresholded Object 1](/Live%20Video%20Frames/Ball.jpg)
 
-  *Original video frame image of a hollow ball.*
+  _Original video frame image of a hollow ball._
 
   ![Thresholded Object 2](/Live%20Video%20Frames/Ball_threshold.jpg)
 
-  *Threshold Output of video frame image of the hollow ball.*
+  _Threshold Output of video frame image of the hollow ball._
 
   ![Thresholded Object 1](/Live%20Video%20Frames/Mouse.jpg)
 
-  *Original video frame image of a Mouse.*
+  _Original video frame image of a Mouse._
 
   ![Thresholded Object 2](/Live%20Video%20Frames/Mouse_threshold.jpg)
 
-  *Threshold Output of video frame image of the Mouse.*
+  _Threshold Output of video frame image of the Mouse._
 
 - **Task 2: Cleaned Images**
-  
+
   ![Cleaned Image 1](/Live%20Video%20Frames/Sunglass_Task2.JPG)
 
-  *Output display for Original, threshold, and morphological cleanup for a pair of sunglass.*
+  _Output display for Original, threshold, and morphological cleanup for a pair of sunglass._
 
   ![Cleaned Image 2](/Live%20Video%20Frames/Ball_Task2.JPG)
 
-  *Output display for Original, threshold, and morphological cleanup for a hollow ball.*
+  _Output display for Original, threshold, and morphological cleanup for a hollow ball._
 
   ![Cleaned Image 3](/Live%20Video%20Frames/Mouse_Task2.JPG)
 
-  *Output display for Original, threshold, and morphological cleanup for a mouse.*
+  _Output display for Original, threshold, and morphological cleanup for a mouse._
 
   ![Cleaned Image 4](/Live%20Video%20Frames/Mug_Task2.JPG)
 
-  *Output display for Original, threshold, and morphological cleanup for a mug.*
+  _Output display for Original, threshold, and morphological cleanup for a mug._
 
 - **Task 3: Region Maps**
-  
+
   ![Cleaned Image 1](/Live%20Video%20Frames/Sunglass_Task3.JPG)
 
-  *Output display for Original, threshold, morphological cleanup, and segmented region map for a pair of sunglass.*
+  _Output display for Original, threshold, morphological cleanup, and segmented region map for a pair of sunglass._
 
   ![Cleaned Image 2](/Live%20Video%20Frames/Ball_Task3.JPG)
 
-  *Output display for Original, threshold, morphological cleanup, and segmented region map for a hollow ball.*
+  _Output display for Original, threshold, morphological cleanup, and segmented region map for a hollow ball._
 
   ![Cleaned Image 3](/Live%20Video%20Frames/Mouse_Task3.JPG)
 
-  *Output display for Original, threshold, morphological cleanup, and segmented region map for a mouse.*
+  _Output display for Original, threshold, morphological cleanup, and segmented region map for a mouse._
 
   ![Cleaned Image 4](/Live%20Video%20Frames/Mug_Task3.JPG)
 
-  *Output display for Original, threshold, morphological cleanup, and segmented region map for a mug.*
+  _Output display for Original, threshold, morphological cleanup, and segmented region map for a mug._
 
 - **Task 4: Feature Computation**
 
   ![Cleaned Image 1](/Live%20Video%20Frames/Sunglass_Task4.JPG)
 
-  *Output display for Original, threshold, morphological cleanup, and segmented region map (with the feature vector overlaid) for a pair of sunglasses.*
+  _Output display for Original, threshold, morphological cleanup, and segmented region map (with the feature vector overlaid) for a pair of sunglasses._
 
   ![Cleaned Image 2](/Live%20Video%20Frames/Ball_Task4.JPG)
 
-  *Output display for Original, threshold, morphological cleanup, and segmented region map (with the feature vector overlaid) for a hollow ball.*
+  _Output display for Original, threshold, morphological cleanup, and segmented region map (with the feature vector overlaid) for a hollow ball._
 
   ![Cleaned Image 3](/Live%20Video%20Frames/Mouse_Task4.JPG)
 
-  *Output display for Original, threshold, morphological cleanup, and segmented region map (with the feature vector overlaid) for a mouse.*
+  _Output display for Original, threshold, morphological cleanup, and segmented region map (with the feature vector overlaid) for a mouse._
 
   ![Cleaned Image 4](/Live%20Video%20Frames/Mug_Task4.JPG)
 
-  *Output display for Original, threshold, morphological cleanup, and segmented region map (with the feature vector overlaid) for a mug.*
+  _Output display for Original, threshold, morphological cleanup, and segmented region map (with the feature vector overlaid) for a mug._
 
 - **Task 5: Training Data Collection**
 
@@ -116,60 +118,58 @@ Then running the project ImageFeatureExtractor main program, it will store featu
 
   ![Cleaned Image 1](/Live%20Video%20Frames/Sunglass_Task6.JPG)
 
-  *Output display for Original, threshold, morphological cleanup, and segmented region map (with the feature vector and text label overlaid) for a pair of sunglasses.*
+  _Output display for Original, threshold, morphological cleanup, and segmented region map (with the feature vector and text label overlaid) for a pair of sunglasses._
 
   ![Cleaned Image 2](/Live%20Video%20Frames/Ball_Task6.JPG)
 
-  *Output display for Original, threshold, morphological cleanup, and segmented region map (with the feature vector and text label overlaid) for a hollow ball.*
+  _Output display for Original, threshold, morphological cleanup, and segmented region map (with the feature vector and text label overlaid) for a hollow ball._
 
   ![Cleaned Image 3](/Live%20Video%20Frames/Mouse_Task6.JPG)
 
-  *Output display for Original, threshold, morphological cleanup, and segmented region map (with the feature vector and text label overlaid) for a mouse.*
+  _Output display for Original, threshold, morphological cleanup, and segmented region map (with the feature vector and text label overlaid) for a mouse._
 
   ![Cleaned Image 4](/Live%20Video%20Frames/Mug_Task6.JPG)
 
-  *Output display for Original, threshold, morphological cleanup, and segmented region map (with the feature vector and text label overlaid) for a mug.*
+  _Output display for Original, threshold, morphological cleanup, and segmented region map (with the feature vector and text label overlaid) for a mug._
 
 - **Task 7: KNN Classifier**
 
   ![Cleaned Image 1](/Live%20Video%20Frames/Task7_display.JPG)
 
-  *Testing multiple object recognition using KNN Classifier.*
+  _Testing multiple object recognition using KNN Classifier._
 
   ![Cleaned Image 2](/Live%20Video%20Frames/Task7_display2.JPG)
 
-  *Testing multiple object recognition using KNN Classifier.*
+  _Testing multiple object recognition using KNN Classifier._
 
 - **Task 8: Confusion Matrix for Evaluation**
 
-|  Truth ->      | mouse | sunglass | scraper | scissor | mug | cable | notebook | box | ball | utensil pack | opener | pen |
-|----------------|-------|----------|---------|---------|-----|-------|----------|-----|------|--------------|--------|-----|
-| mouse          | 3     | 0        | 1       | 0       | 0   | 0     | 0        | 0   | 0    | 0            | 0      | 0   |
-| sunglass       | 0     | 5        | 0       | 0       | 0   | 0     | 0        | 0   | 0    | 0            | 0      | 0   |
-| scraper        | 0     | 0        | 7       | 2       | 0   | 0     | 0        | 0   | 0    | 0            | 0      | 0   |
-| scissor        | 0     | 0        | 0       | 4       | 0   | 2     | 0        | 0   | 0    | 0            | 0      | 0   |
-| mug            | 0     | 0        | 0       | 0       | 5   | 0     | 0        | 0   | 0    | 0            | 0      | 0   |
-| cable          | 0     | 0        | 0       | 2       | 0   | 3     | 0        | 0   | 0    | 0            | 0      | 0   |
-| notebook       | 5     | 3        | 2       | 1       | 5   | 0     | 10       | 3   | 2    | 0            | 0      | 0   |
-| box            | 0     | 0        | 0       | 0       | 0   | 0     | 0        | 7   | 0    | 0            | 0      | 0   |
-| ball           | 2     | 2        | 0       | 0       | 0   | 5     | 0        | 0   | 8    | 0            | 0      | 0   |
-| utensil pack   | 0     | 0        | 0       | 1       | 0   | 0     | 0        | 0   | 0    | 2            | 0      | 0   |
-| opener         | 0     | 0        | 0       | 0       | 0   | 0     | 0        | 0   | 0    | 0            | 6      | 4   |
-| pen            | 0     | 0        | 0       | 0       | 0   | 0     | 0        | 0   | 0    | 0            | 4      | 6   |
-
+| Truth ->     | mouse | sunglass | scraper | scissor | mug | cable | notebook | box | ball | utensil pack | opener | pen |
+| ------------ | ----- | -------- | ------- | ------- | --- | ----- | -------- | --- | ---- | ------------ | ------ | --- |
+| mouse        | 3     | 0        | 1       | 0       | 0   | 0     | 0        | 0   | 0    | 0            | 0      | 0   |
+| sunglass     | 0     | 5        | 0       | 0       | 0   | 0     | 0        | 0   | 0    | 0            | 0      | 0   |
+| scraper      | 0     | 0        | 7       | 2       | 0   | 0     | 0        | 0   | 0    | 0            | 0      | 0   |
+| scissor      | 0     | 0        | 0       | 4       | 0   | 2     | 0        | 0   | 0    | 0            | 0      | 0   |
+| mug          | 0     | 0        | 0       | 0       | 5   | 0     | 0        | 0   | 0    | 0            | 0      | 0   |
+| cable        | 0     | 0        | 0       | 2       | 0   | 3     | 0        | 0   | 0    | 0            | 0      | 0   |
+| notebook     | 5     | 3        | 2       | 1       | 5   | 0     | 10       | 3   | 2    | 0            | 0      | 0   |
+| box          | 0     | 0        | 0       | 0       | 0   | 0     | 0        | 7   | 0    | 0            | 0      | 0   |
+| ball         | 2     | 2        | 0       | 0       | 0   | 5     | 0        | 0   | 8    | 0            | 0      | 0   |
+| utensil pack | 0     | 0        | 0       | 1       | 0   | 0     | 0        | 0   | 0    | 2            | 0      | 0   |
+| opener       | 0     | 0        | 0       | 0       | 0   | 0     | 0        | 0   | 0    | 0            | 6      | 4   |
+| pen          | 0     | 0        | 0       | 0       | 0   | 0     | 0        | 0   | 0    | 0            | 4      | 6   |
 
 - **Task 9: System Demo Video**
 
 ![Video_demo](https://github.com/zhangshi0512/cs5330_project03_realTime2DObjectRecognition/assets/100053535/bce9ec43-9f38-4253-b0da-e270e080b17e)
 
-  *Video walkthrough of the Program running.*
----
+## _Video walkthrough of the Program running._
 
 #### 3. Extensions
 
 - **K-Nearest Neighbor Classification**
 
-  In addition to the simple nearest-neighbor recognition, a K-Nearest Neighbor (KNN) matching was implemented. This involves considering the K nearest neighbors in the feature space to make a decision. Please refer to the classifyObjectKNN function under main.cpp under realTime2dObjectRecognition Project.  
+  In addition to the simple nearest-neighbor recognition, a K-Nearest Neighbor (KNN) matching was implemented. This involves considering the K nearest neighbors in the feature space to make a decision. Please refer to the classifyObjectKNN function under main.cpp under realTime2dObjectRecognition Project.
 
 - **Contour-based Object Recognition**
 
@@ -211,24 +211,27 @@ OpenCV: 4.6.0
 
 #### OpenCV Setup for windows
 
-I used OpenCV 4.6.0 Version for this project. 
+I used OpenCV 4.6.0 Version for this project.
 
-Before run the application, you will need to add the Path for environment variables on Windows. 
+Before run the application, you will need to add the Path for environment variables on Windows.
 
 This step can be referred to this tutorial: [Setup OpenCV in Visual Studio 2022 for C/C++ Development](https://www.youtube.com/watch?v=unSce_GPwto)
 
 #### Project Setup within Visual Studio 2022
 
 ##### Step 1: Create a Solution
+
 Open Visual Studio.
 Go to File -> New -> Project....
 In the Create a new project dialog, choose Empty Project under Installed -> Visual C++.
 Name the Solution (e.g., realTime2DObjectRecognition) and the two Projects (imageFeatureExtractor and realTime2dObjectRecognition) and choose a location to save it. Click Create.
 
 ##### Step 2: Add the First Project
+
 In Solution Explorer, right-click on the imageFeatureExtractor project.
 Choose Add -> New Item....
 I created and stored the following files under this project to extract image features from a local image directory and store feature vectors in a CSV file.
+
 - csv_util.h
 - csv_util.cpp
 - feature_extractor.h
@@ -240,6 +243,7 @@ I created and stored the following files under this project to extract image fea
 - main_feature.cpp
 
 ##### Step 3: Add the Second Project
+
 In Solution Explorer, right-click on the Solution (not the project).
 Choose Add -> New Project....
 Again choose Empty Project under Installed -> Visual C++.
@@ -247,6 +251,7 @@ Name the second project (e.g., realTime2dObjectRecognition) and click Create.
 In Solution Explorer, right-click on the FeatureMatching project.
 Choose Add -> New Item....
 I created and stored the following files under this project to load feature vectors from a local CSV file and compare them with a live camera frame to get a classified result.
+
 - feature_extractor.h
 - feature_extractor.cpp
 - display.h
@@ -258,13 +263,15 @@ I created and stored the following files under this project to load feature vect
 - main_recognition.cpp
 
 ##### Step 4: Set Project Dependencies (if any)
+
 If one project depends on the other, right-click on the Solution in Solution Explorer.
 Go to Project Dependencies....
 Select a project from the Projects dropdown menu.
 Check the projects it depends on.
 
 ##### Step 5: Update the file path for your local environment.
-###### Go to main.cpp under ImageFeatureExtractor Project you created. 
+
+###### Go to main.cpp under ImageFeatureExtractor Project you created.
 
 - std::string directoryPath is for the image library, where you saved the given image database folder in your local drive.
 
@@ -275,11 +282,14 @@ Check the projects it depends on.
 - loadObjectDBFromCSV function call under main function directly contains a string to locate the input CSV file.
 
 ##### Step 6: Build and Run the Projects
+
 To build a specific project, right-click on the project in Solution Explorer and choose Build.
 To run a specific project, right-click on the project in Solution Explorer and choose Set as StartUp Project, then press F5 or click on the Start Debugging button.
 
 ##### Step 7: Debugging and Running
+
 You can debug or run each project separately by setting it as the startup project.
 
 ### Time Travel Days
-I request to use 2 travel days in this assignment. 
+
+I request to use 2 travel days in this assignment.
