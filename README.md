@@ -161,9 +161,7 @@ Then running the project ImageFeatureExtractor main program, it will store featu
 
 - **Task 9: System Demo Video**
 
-![Video_demo](https://github.com/zhangshi0512/cs5330_project03_realTime2DObjectRecognition/assets/100053535/bce9ec43-9f38-4253-b0da-e270e080b17e)
-
-## _Video walkthrough of the Program running._
+![Video_demo](https://i.imgur.com/vt2yI3t.gif)
 
 #### 3. Extensions
 
