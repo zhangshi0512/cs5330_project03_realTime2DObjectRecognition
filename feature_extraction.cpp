@@ -1,5 +1,12 @@
+// feature_extraction.cpp
+// This file contains functions for extracting features from regions in an image, such as contours,
+// oriented bounding boxes, aspect ratios, and Hu moments, as well as computing the Hausdorff distance between contours.
+
+// Author: Shi Zhang
+
 #include "feature_extraction.h"
 
+// Function to compute the contour of a specific region in an image based on label IDs
 std::vector<cv::Point> computeRegionContour(const cv::Mat& labels, int regionID) {
     std::vector<std::vector<cv::Point>> contours;
     cv::Mat regionMask;
@@ -15,6 +22,8 @@ std::vector<cv::Point> computeRegionContour(const cv::Mat& labels, int regionID)
     }
 }
 
+// Function to compute various features for a specific region in an image, including oriented bounding box, 
+// aspect ratio, percent filled, and image moments
 RegionFeatures computeRegionFeatures(const cv::Mat& labels, int regionID) {
     RegionFeatures features;
     std::vector<cv::Point2f> regionPoints;
@@ -86,6 +95,7 @@ RegionFeatures computeRegionFeatures(const cv::Mat& labels, int regionID) {
     return features;
 }
 
+// Function to compute the Hausdorff Distance between two contours, a measure of shape similarity
 float hausdorffDistance(const std::vector<cv::Point>& contour1, const std::vector<cv::Point>& contour2) {
     auto h = [](const std::vector<cv::Point>& A, const std::vector<cv::Point>& B) -> float {
         float maxDistA = 0.0f;

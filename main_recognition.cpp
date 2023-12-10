@@ -1,4 +1,9 @@
-// main.cpp
+// main_recognition.cpp
+// This program provides a comprehensive pipeline for image processing and object recognition.
+// It includes functions for opening and saving files, image thresholding, connected components labeling,
+// feature extraction, object classification, and displaying results.
+
+// Author: Shi Zhang
 
 #include <iostream>
 #include <fstream>
@@ -11,7 +16,7 @@
 #include "feature_extraction.h"
 #include <opencv2/opencv.hpp>
 
-// function to select image
+// Function to open a dialog box for image selection
 std::vector<std::string> openFileDialog() {
     OPENFILENAME ofn;
     WCHAR szFile[260] = { 0 };
@@ -45,6 +50,7 @@ std::vector<std::string> openFileDialog() {
     return fileNames;
 }
 
+// Function to open a save file dialog
 BOOL saveFileDialog(std::wstring& outFilePath) {
     OPENFILENAME ofn;
     WCHAR szFile[260] = { 0 };
@@ -65,6 +71,7 @@ BOOL saveFileDialog(std::wstring& outFilePath) {
     return FALSE;
 }
 
+// Function to display images and provide options to save them
 void displayAndOptionallySave(const cv::Mat& original, const cv::Mat& thresholded, const cv::Mat& cleaned, const cv::Mat& segmented) {
     displayImages(original, thresholded, cleaned, segmented);
 
@@ -125,7 +132,7 @@ void displayAndOptionallySave(const cv::Mat& original, const cv::Mat& thresholde
     }
 }
 
-
+// Function to check if an image is binary
 bool isBinaryImage(const cv::Mat& src) {
     for (int i = 0; i < src.rows; i++) {
         for (int j = 0; j < src.cols; j++) {
@@ -138,6 +145,7 @@ bool isBinaryImage(const cv::Mat& src) {
     return true;
 }
 
+// Function to label connected components in a binary image and filter by size
 cv::Mat labelConnectedComponents(const cv::Mat& src, int minSize, cv::Mat& stats) {
     cv::Mat labels, centroids, invertedSrc;
 
@@ -183,6 +191,7 @@ cv::Mat labelConnectedComponents(const cv::Mat& src, int minSize, cv::Mat& stats
     return labels;
 }
 
+// Function to color connected components for visualization
 cv::Mat colorConnectedComponents(const cv::Mat& labels) {
     // A vector to hold the colors for each label
     std::vector<cv::Vec3b> colors;
@@ -216,15 +225,14 @@ cv::Mat colorConnectedComponents(const cv::Mat& labels) {
 
 
 // Function to hold training database
-// Data structure to hold feature vectors and labels
-// Data structure to hold feature vectors and labels
+// Data structure to hold feature vectors and labels for objects
 struct ObjectData {
     std::string label;
     RegionFeatures features;
     float additionalFeatures[16]; 
 };
 
-
+// Function to save the object database to a file
 void saveObjectDB(const std::string& filename, const std::vector<ObjectData>& objectDB) {
     std::ofstream outFile(filename, std::ios::out);
     if (!outFile) {
@@ -260,18 +268,7 @@ void saveObjectDB(const std::string& filename, const std::vector<ObjectData>& ob
     std::cout << "Saved object data to: " << filename << std::endl;
 }
 
-// helper function for user to attach a label
-/**
-std::string getLabelFromUser() {
-    char input[100];
-    std::cout << "Enter the label for the object: ";
-    std::cin.getline(input, sizeof(input));
-    return std::string(input);
-}
-**/
-
-// function to load object database from a csv file
-// function to load object database from a csv file
+// Function to load the object database from a CSV file
 bool loadObjectDBFromCSV(const std::string& filename, std::vector<ObjectData>& objectDB) {
     std::ifstream inFile(filename, std::ios::in);
     if (!inFile) {
@@ -313,7 +310,7 @@ bool loadObjectDBFromCSV(const std::string& filename, std::vector<ObjectData>& o
 }
 
 
-// Function to define the scaled Euclidean distance metric
+// Function to compute scaled Euclidean distance between two feature vectors
 float scaledEuclideanDistance(const RegionFeatures& f1, const RegionFeatures& f2) {
     float stdev_orientedBoundingBox_center_x = 1.0;
     float stdev_orientedBoundingBox_center_y = 1.0;
@@ -361,7 +358,7 @@ float scaledEuclideanDistance(const RegionFeatures& f1, const RegionFeatures& f2
 }
 
 
-// Function to compare new object's feature vector to existing database using the distance metric
+// Function to classify an object based on its features and the existing database
 std::string classifyObject(const RegionFeatures& features, const std::vector<ObjectData>& objectDB) {
     std::cout << "Classifying object..." << std::endl;
     std::cout << "Number of objects in objectDB: " << objectDB.size() << std::endl;
@@ -384,7 +381,7 @@ std::string classifyObject(const RegionFeatures& features, const std::vector<Obj
     return bestMatchLabel;
 }
 
-// KNN classifier
+// Function to classify an object using k-Nearest Neighbors
 std::string classifyObjectKNN(const RegionFeatures& features, const std::vector<ObjectData>& objectDB, int k) {
     std::vector<std::pair<float, std::string>> distances;
 

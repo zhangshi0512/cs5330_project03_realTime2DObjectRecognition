@@ -1,5 +1,12 @@
+// display.cpp
+// This file contains functions for displaying multiple images in a single window. 
+// It provides utilities to organize and visualize different stages of image processing.
+
+// Author: Shi Zhang
+
 #include "display.h"
 
+// Displays multiple images (original, thresholded, morphological, and segmented) in separate windows
 void displayImages(const cv::Mat& original, const cv::Mat& thresholded, const cv::Mat& morphological, const cv::Mat& segmented) {
     int width = 1920 / 4; // divide screen width into four for four images
 

@@ -27,7 +27,7 @@
   <ItemGroup>
     <ClCompile Include="display.cpp" />
     <ClCompile Include="feature_extraction.cpp" />
-    <ClCompile Include="main.cpp" />
+    <ClCompile Include="main_recognition.cpp" />
     <ClCompile Include="morphologicalOperations.cpp" />
     <ClCompile Include="thresholding.cpp" />
   </ItemGroup>

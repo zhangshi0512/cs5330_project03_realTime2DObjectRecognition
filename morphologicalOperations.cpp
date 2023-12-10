@@ -1,5 +1,12 @@
+// MorphologicalOperations.cpp
+// This file contains custom implementations of morphological operations (erosion, dilation)
+// and their application to process images using OpenCV.
+
+// Author: Shi Zhang
+
 #include <opencv2/opencv.hpp>
 
+// Erodes an image using a specified kernel
 void erode(const cv::Mat& src, cv::Mat& dst, const cv::Mat& kernel) {
     dst = src.clone();
     int kRowsHalf = kernel.rows / 2;
@@ -25,6 +32,7 @@ void erode(const cv::Mat& src, cv::Mat& dst, const cv::Mat& kernel) {
     }
 }
 
+// Dilates an image using a specified kernel
 void dilate(const cv::Mat& src, cv::Mat& dst, const cv::Mat& kernel) {
     dst = src.clone();
     int kRowsHalf = kernel.rows / 2;
@@ -50,7 +58,7 @@ void dilate(const cv::Mat& src, cv::Mat& dst, const cv::Mat& kernel) {
     }
 }
 
-
+// Applies a series of morphological operations (erosion followed by dilation) to an image
 void applyMorphologicalOperations(const cv::Mat& src, cv::Mat& dst) {
     // Define a larger kernel for the morphological operations
     cv::Mat kernel = cv::Mat::ones(5, 5, CV_8U);
@@ -60,19 +68,3 @@ void applyMorphologicalOperations(const cv::Mat& src, cv::Mat& dst) {
     erode(src, eroded, kernel);
     dilate(eroded, dst, kernel);
 }
-
-
-
-/***
-* // morphological function directly using openCV
-void applyMorphologicalOperations(const cv::Mat& src, cv::Mat& dst) {
-    // Define a kernel for the morphological operations
-    cv::Mat kernel = cv::getStructuringElement(cv::MORPH_RECT, cv::Size(5, 5));
-
-    // Erode the image to remove small noises
-    cv::erode(src, dst, kernel);
-
-    // Dilate the image to restore the eroded parts
-    cv::dilate(dst, dst, kernel);
-}
-***/

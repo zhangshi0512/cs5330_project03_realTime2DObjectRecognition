@@ -35,7 +35,7 @@
     <ClCompile Include="display.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="main.cpp">
+    <ClCompile Include="main_recognition.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="morphologicalOperations.cpp">

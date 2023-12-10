@@ -1,7 +1,12 @@
 // thresholding.cpp
+// Implements dynamic thresholding techniques for image processing, including a custom method 
+// that uses k-means clustering for threshold determination.
+
+// Author: Shi Zhang
 
 #include "thresholding.h"
 
+// Applies dynamic thresholding to an image using k-means clustering to determine the threshold
 void dynamicThresholding(const cv::Mat& src, cv::Mat& dst) {
     // Pre-process: Apply Gaussian blur
     cv::Mat blurred;
@@ -32,6 +37,7 @@ void dynamicThresholding(const cv::Mat& src, cv::Mat& dst) {
     thresholdImage(blurred, dst, thresholdValue);
 }
 
+// Applies a simple threshold to an image based on a specified threshold value
 void thresholdImage(const cv::Mat& src, cv::Mat& dst, int thresholdValue) {
     cv::Mat grayscale;
     cv::cvtColor(src, grayscale, cv::COLOR_BGR2GRAY); // Convert to grayscale
