@@ -383,7 +383,7 @@ std::string classifyObject(const RegionFeatures& features, const std::vector<Obj
     return bestMatchLabel;
 }
 
-// Function to classify an object using k-Nearest Neighbors
+// Function to classify an object using k-Nearest Neighbors with distance summing for multi-class
 std::string classifyObjectKNN(const RegionFeatures& features, const std::vector<ObjectData>& objectDB, int k) {
     std::vector<std::pair<float, std::string>> distances;
 
@@ -396,25 +396,24 @@ std::string classifyObjectKNN(const RegionFeatures& features, const std::vector<
     // Sort distances
     std::sort(distances.begin(), distances.end());
 
-    // Use a map to count the occurrences of each label among the k nearest neighbors
-    std::map<std::string, int> labelCounts;
+    // Use a map to sum the distances of each label among the k nearest neighbors
+    std::map<std::string, float> distanceSums;
     for (int i = 0; i < k && i < distances.size(); i++) {
-        labelCounts[distances[i].second]++;
+        distanceSums[distances[i].second] += distances[i].first;
     }
 
-    // Find the label with the maximum count
+    // Find the label with the minimum sum of distances
     std::string bestMatchLabel = "Unknown";
-    int maxCount = 0;
-    for (auto& pair : labelCounts) {
-        if (pair.second > maxCount) {
-            maxCount = pair.second;
+    float minSumDistance = std::numeric_limits<float>::max();
+    for (const auto& pair : distanceSums) {
+        if (pair.second < minSumDistance) {
+            minSumDistance = pair.second;
             bestMatchLabel = pair.first;
         }
     }
 
     return bestMatchLabel;
 }
-
 
 int main() {
     // initialize the objectDB vector
