@@ -237,7 +237,7 @@ I created and stored the following files under this project to extract image fea
 - thresholding.cpp
 - morphologicalOperations.h
 - morphologicalOperations.cpp
-- main.cpp
+- main_feature.cpp
 
 ##### Step 3: Add the Second Project
 In Solution Explorer, right-click on the Solution (not the project).
@@ -255,7 +255,7 @@ I created and stored the following files under this project to load feature vect
 - thresholding.cpp
 - morphologicalOperations.h
 - morphologicalOperations.cpp
-- main.cpp
+- main_recognition.cpp
 
 ##### Step 4: Set Project Dependencies (if any)
 If one project depends on the other, right-click on the Solution in Solution Explorer.
